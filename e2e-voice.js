@@ -1,0 +1,20 @@
+const boot = require("./e2e-lib");
+boot(async ({ run, click, sleep, check }) => {
+  await click("#mSettings"); await click("#setTabs [data-st=voice]"); await sleep(1800);
+  const opts = await run(`[...document.querySelector('#voMic').options].map(o=>o.value+'|'+o.textContent)`);
+  check("Voice settings list the microphones to choose from", opts.length >= 2, opts.map((o) => o.split("|")[1].slice(0, 28)).join(" / "));
+  check("Voice settings say the engine works offline", await run(`document.querySelector('#voEngine').textContent.includes('offline')`));
+  const chosen = opts[opts.length - 1].split("|")[0]; await run(`(()=>{const s=document.querySelector('#voMic');s.value='${chosen}';document.querySelector('#voSave').click();return 0})()`); await sleep(300);
+  await click("#micBtn"); await sleep(2500);
+  check("Start listening turns the offline voice engine on", (await run(`SAI_VOICE.on`)) && (await run(`document.querySelector('#micPill').textContent`)).includes("offline"));
+  check("the microphone chosen in Settings is the one in use", (await run(`SAI_VOICE.stream.getAudioTracks()[0].getSettings().deviceId`)) === chosen);
+  await sleep(26000);
+  const tr = await run(`document.querySelector('#transcript').textContent.toLowerCase()`), labels = await run(`[...document.querySelectorAll('#dets .card b')].map(b=>b.textContent)`);
+  console.log("  transcript:", tr.replace(/\s+/g, " ").slice(0, 230)); console.log("  detected:", labels.join(" | "));
+  check("speech appears as live transcript", /chapter three/.test(tr));
+  check("spoken reference detected: John 3:16", labels.includes("John 3:16"));
+  check("a clearly spoken reference is put on the output screen automatically", /sent not|suffereth long|so loved/.test(await run(`document.querySelector('#preview').textContent`)), (await run(`document.querySelector('#preview').textContent`)).slice(-30));
+  check("at least two of the three spoken references were found", ["John 3:16", "1 Corinthians 13:4", "John 3:17"].filter((l) => labels.includes(l)).length >= 2);
+  await click("#micBtn"); await sleep(800);
+  check("Stop listening turns it off", !(await run(`SAI_VOICE.on`)) && !(await run(`fetch('/stt/status').then(r=>r.json()).then(j=>j.running)`)));
+});

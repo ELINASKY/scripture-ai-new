@@ -1,0 +1,71 @@
+{
+  "name": "scripture-ai-desktop",
+  "version": "0.9.0",
+  "description": "Church presentation software with automatic scripture detection",
+  "author": "Scripture AI",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test:e2e": "electron --no-sandbox e2e-ui.js && electron --no-sandbox e2e-io.js && electron --no-sandbox e2e-layout.js && electron --no-sandbox e2e-web.js && electron --no-sandbox e2e-new1.js && electron --no-sandbox e2e-new2.js && electron --no-sandbox e2e-para.js && FAKE_AUDIO=/tmp/voice.wav electron --no-sandbox e2e-voice.js",
+    "dist": "electron-builder --win nsis"
+  },
+  "build": {
+    "appId": "com.churchmedia.scriptureai",
+    "productName": "Scripture AI",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "server.js",
+      "stt.js",
+      "preload.js",
+      "ipc.js",
+      "app/**/*",
+      "build/icon.png",
+      "node_modules/ffmpeg-static/**/*",
+      "!node_modules/ffmpeg-static/ffmpeg",
+      "node_modules/sherpa-onnx-node/**/*",
+      "node_modules/sherpa-onnx-win-x64/**/*",
+      "!node_modules/sherpa-onnx-linux-x64/**",
+      "ndi.js",
+      "node_modules/grandi/**/*",
+      "node_modules/@grandi/win32-x64/**/*",
+      "!node_modules/@grandi/linux-x64/**"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.png",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "createDesktopShortcut": true
+    },
+    "asarUnpack": [
+      "node_modules/ffmpeg-static/ffmpeg.exe",
+      "node_modules/sherpa-onnx-win-x64/**/*",
+      "node_modules/grandi/**/*",
+      "node_modules/@grandi/win32-x64/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "models",
+        "to": "models"
+      }
+    ]
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "dependencies": {
+    "ffmpeg-static": "^5.3.0",
+    "grandi": "^2.0.2",
+    "qrcode": "^1.5.4",
+    "selfsigned": "^5.5.0",
+    "sherpa-onnx-node": "^2.0.1"
+  }
+}

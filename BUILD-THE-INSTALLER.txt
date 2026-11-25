@@ -1,0 +1,20 @@
+HOW TO GET THE REAL INSTALLER (Setup.exe) FROM GITHUB - FREE
+=============================================================
+1. On github.com create a new repository (for example: scripture-ai-desktop). Public or private both work.
+2. Upload EVERYTHING from this folder. Important: also upload the hidden folder ".github" (it contains build.yml).
+   If dragging skips it: Add file > Create new file, type   .github/workflows/build.yml
+   and paste the contents of that file from this folder.
+3. Open the "Actions" tab. If GitHub asks, click "I understand my workflows, enable them".
+4. Click "Build Windows installer" on the left, then "Run workflow" (green button), then "Run workflow" again.
+5. Wait about 5-8 minutes. Click the finished run (green tick). At the bottom, under "Artifacts",
+   download "Scripture-AI-installer". Unzip it: inside is "Scripture AI Setup 0.8.0.exe".
+6. Double-click it to install. Windows may warn "Windows protected your PC" (the app is not code-signed):
+   click "More info", then "Run anyway".
+
+To publish a numbered release instead: Releases > Draft a new release > create the tag v0.8.0 > Publish.
+The same workflow then attaches the installer to the release page, so others can download it from there.
+
+ABOUT THE OFFLINE VOICE MODEL
+The installer build downloads the small English speech model (about 128 MB download, 42 MB inside the app) automatically
+from the free sherpa-onnx project on GitHub (Apache-2.0 licence). The workflow step "node scripts/get-model.js" does this.
+If you ever build on your own computer instead, run:  node scripts/get-model.js
