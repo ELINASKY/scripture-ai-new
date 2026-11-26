@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Scripture AI camera</title>
+<style>body{margin:0;background:#111;color:#eee;font:16px system-ui,sans-serif;text-align:center}h2{margin:14px 0 4px}p{margin:6px 16px;color:#aaa}
+video{width:100%;max-height:55vh;background:#000;margin-top:10px}button,select{font:inherit;padding:12px 16px;margin:6px;border-radius:8px;border:0}button{background:#2f7bd6;color:#fff;font-weight:600}#s{color:#7ee787;min-height:24px}</style></head>
+<body><h2>Camera for Scripture AI</h2><p>Hold the phone sideways (landscape), then tap Start.</p>
+<video id="v" autoplay playsinline muted></video>
+<div><select id="f"><option value="environment">Back camera</option><option value="user">Front camera</option></select>
+<select id="m"><option value="1">With microphone</option><option value="0">Camera only</option></select></div>
+<button id="go">Start camera</button><p id="s"></p>
+<script>
+const room = new URLSearchParams(location.search).get("room"), $ = (i) => document.getElementById(i), say = (t) => ($("s").textContent = t);
+const wait = (pc) => new Promise((r) => { if (pc.iceGatheringState === "complete") return r(); pc.onicegatheringstatechange = () => pc.iceGatheringState === "complete" && r(); setTimeout(r, 3000); });
+$("go").onclick = async () => {
+  try {
+    $("go").disabled = true; say("Opening camera…");
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: $("f").value, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: $("m").value === "1" });
+    $("v").srcObject = stream; try { navigator.wakeLock && navigator.wakeLock.request("screen"); } catch (e) {}
+    const pc = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
+    stream.getTracks().forEach((t) => pc.addTrack(t, stream));
+    await pc.setLocalDescription(await pc.createOffer()); await wait(pc);
+    say("Connecting to the mixer…");
+    await fetch("/rtc/send?room=" + room, { method: "POST", body: JSON.stringify({ type: "offer", sdp: pc.localDescription.sdp, name: /iPhone|iPad/.test(navigator.userAgent) ? "iPhone" : /Android/.test(navigator.userAgent) ? "Android phone" : "Phone" }) });
+    let after = 0;
+    for (;;) {
+      const msgs = await (await fetch("/rtc/recv?room=" + room + "&as=phone&after=" + after)).json();
+      for (const m of msgs) { after = m.i; const d = JSON.parse(m.data); if (d.type === "answer") { await pc.setRemoteDescription({ type: "answer", sdp: d.sdp }); say("Connected. Keep this page open."); } }
+      if (pc.connectionState === "failed") { say("Connection failed. Make sure the phone is on the same Wi-Fi as the computer."); break; }
+    }
+  } catch (e) { say("Problem: " + (e.message || e)); $("go").disabled = false; }
+};
+</script></body></html>
