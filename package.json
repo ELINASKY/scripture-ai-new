@@ -1,6 +1,6 @@
 {
   "name": "scripture-ai-desktop",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "Church presentation software with automatic scripture detection",
   "author": "Scripture AI",
   "main": "main.js",
@@ -31,7 +31,8 @@
       "ndi.js",
       "node_modules/grandi/**/*",
       "node_modules/@grandi/win32-x64/**/*",
-      "!node_modules/@grandi/linux-x64/**"
+      "!node_modules/@grandi/linux-x64/**",
+      "node_modules/node-gyp-build/**/*"
     ],
     "win": {
       "target": "nsis",
@@ -48,7 +49,8 @@
       "node_modules/ffmpeg-static/ffmpeg.exe",
       "node_modules/sherpa-onnx-win-x64/**/*",
       "node_modules/grandi/**/*",
-      "node_modules/@grandi/win32-x64/**/*"
+      "node_modules/@grandi/win32-x64/**/*",
+      "node_modules/node-gyp-build/**/*"
     ],
     "extraResources": [
       {
